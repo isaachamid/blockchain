@@ -9,6 +9,7 @@
   "author": "Isaac",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.21.1",
     "sha256": "^0.2.0"
   }
 }

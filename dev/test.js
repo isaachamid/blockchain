@@ -13,3 +13,24 @@ mycoin.createNewTransaction(1300, "SENDER_ADDRESS", "RECIPIENT_ADDRESS");
 mycoin.createNewBlock(113, "EEE", "FFF");
 
 console.log(mycoin);
+
+const previousBlockHash = "AJKSDHKAHDKHASBZXMBCMKHSLKFF564654FD65S4F";
+const currentBlockData = [
+  {
+    amount: 10,
+    sender: "SENDER_ADDRESS",
+    recipient: "RECIPIENT_ADDRESS",
+  },
+  {
+    amount: 20,
+    sender: "SENDER_ADDRESS",
+    recipient: "RECIPIENT_ADDRESS",
+  },
+  {
+    amount: 30,
+    sender: "SENDER_ADDRESS",
+    recipient: "RECIPIENT_ADDRESS",
+  },
+];
+const nonce = 100;
+console.log(mycoin.hashBlock(previousBlockHash, currentBlockData, nonce));

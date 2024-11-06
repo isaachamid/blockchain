@@ -32,5 +32,8 @@ const currentBlockData = [
     recipient: "RECIPIENT_ADDRESS",
   },
 ];
-const nonce = 100;
+let nonce = 100;
+console.log(mycoin.hashBlock(previousBlockHash, currentBlockData, nonce));
+
+nonce = mycoin.proofOfWork(previousBlockHash, currentBlockData);
 console.log(mycoin.hashBlock(previousBlockHash, currentBlockData, nonce));

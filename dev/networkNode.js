@@ -5,6 +5,7 @@ const Blockchain = require("./blockchain");
 const { v4: uuidv4 } = require("uuid");
 const nodeAddress = uuidv4().split("-").join("");
 const port = process.argv[2];
+const rp = require("request-promise");
 
 const mycoin = new Blockchain();
 
@@ -49,6 +50,40 @@ app.get("/mine", function (req, res) {
     note: "New block mined successfully",
     block: newBlock,
   });
+});
+
+app.post("/register-and-broadcast-node", function (req, res) {
+  const newNodeUrl = req.body.newNodeUrl;
+  if (mycoin.networkNodes.indexOf(newNodeUrl) == -1)
+    mycoin.networkNodes.push(newNodeUrl);
+
+  const regNodesPromises = [];
+  mycoin.networkNodes.forEach((networkNodeUrl) => {
+    const requestOptions = {
+      uri: networkNodeUrl + "/register-node",
+      method: "POST",
+      body: {
+        newNodeUrl: newNodeUrl,
+      },
+      json: true,
+    };
+    regNodesPromises.push(rp(requestOptions));
+  });
+  Promise.all(regNodesPromises)
+    .then((data) => {
+      const bulkRegisterOptions = {
+        url: newNodeUrl + "/register-nodes/bulk",
+        method: "POST",
+        body: {
+          allNetworkNodes: [...mycoin.networkNodes, mycoin.currentNodeUrl],
+        },
+        json: true,
+      };
+      return rp(bulkRegisterOptions);
+    })
+    .then((data) => {
+      res.json({ note: "New node registered with network successfully." });
+    });
 });
 
 app.listen(port, function () {

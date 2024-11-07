@@ -86,6 +86,16 @@ app.post("/register-and-broadcast-node", function (req, res) {
     });
 });
 
+app.post("/register-node", function (req, res) {
+  const newNodeUrl = req.body.newNodeUrl;
+  if (
+    mycoin.networkNodes.indexOf(newNodeUrl) == -1 &&
+    mycoin.currentNodeUrl !== newNodeUrl
+  )
+    mycoin.networkNodes.push(newNodeUrl);
+  res.json({ note: "New node registered successfully." });
+});
+
 app.listen(port, function () {
   console.log(`Listening on port ${port}...`);
 });

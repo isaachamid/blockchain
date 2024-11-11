@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const nodeAddress = uuidv4().split("-").join("");
 const port = process.argv[2];
 const rp = require("request-promise");
+const { tr } = require("date-fns/locale");
 
 const mycoin = new Blockchain();
 
@@ -57,18 +58,46 @@ app.get("/mine", function (req, res) {
   };
   const nonce = mycoin.proofOfWork(previousBlockHash, currentBlockData);
 
-  mycoin.createNewTransaction(12.5, "00", nodeAddress);
-
   const blockHash = mycoin.hashBlock(
     previousBlockHash,
     currentBlockData,
     nonce
   );
   const newBlock = mycoin.createNewBlock(nonce, previousBlockHash, blockHash);
-  res.json({
-    note: "New block mined successfully",
-    block: newBlock,
+
+  const requestPromises = [];
+  mycoin.networkNodes.forEach((networkNodeUrl) => {
+    const requestOptions = {
+      uri: networkNodeUrl + "/recieve-new-block",
+      method: "POST",
+      body: { newBlock: newBlock },
+      json: true,
+    };
+
+    requestPromises.push(rp(requestOptions));
   });
+
+  Promise.all(requestPromises)
+    .then((data) => {
+      // reward transaction
+      const requestOptions = {
+        uri: mycoin.currentNodeUrl + "/transaction/broadcast",
+        method: "POST",
+        body: {
+          amount: 12.5,
+          sender: "00",
+          recipient: nodeAddress,
+        },
+        json: true,
+      };
+      return rp(requestOptions);
+    })
+    .then((data) => {
+      res.json({
+        note: "New block mined and broadcasted successfully",
+        block: newBlock,
+      });
+    });
 });
 
 app.post("/register-and-broadcast-node", function (req, res) {

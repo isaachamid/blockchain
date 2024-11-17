@@ -221,6 +221,15 @@ app.get("/block/:blockHash ", function (req, res) {
   });
 });
 
+app.get("/transaction/:transactionId", function (req, res) {
+  const transactionId = req.params.transactionId;
+  const transactionData = mycoin.getTransaction(transactionId);
+  res.json({
+    transaction: transactionData.transaction,
+    block: transactionData.block,
+  });
+});
+
 app.listen(port, function () {
   console.log(`Listening on port ${port}...`);
 });
